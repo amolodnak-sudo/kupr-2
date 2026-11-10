@@ -1,0 +1,7 @@
+key,value
+package_name,curl
+repo_url,https://dl-cdn.alpinelinux.org/alpine/v3.18/main/x86_64/
+test_mode,false
+output_file,graph.svg
+ascii_tree,true
+max_depth,5
