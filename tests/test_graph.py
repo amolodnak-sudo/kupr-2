@@ -11,6 +11,10 @@ from graph_builder import (
     load_test_graph
 )
 
+MAX_NODES_IN_CYCLE_GRAPH = 3
+TEST_DEPTH = 1
+ROOT_NODE_INDEX = 0
+
 
 def test_build_graph_bfs_simple():
     packages = {
@@ -32,7 +36,7 @@ def test_build_graph_bfs_cycle():
         'C': ['A']
     }
     graph = build_graph_bfs(packages, 'A', 5)
-    assert len(graph) <= 3
+    assert len(graph) <= MAX_NODES_IN_CYCLE_GRAPH
     assert 'A' in graph
 
 
@@ -42,7 +46,7 @@ def test_build_graph_bfs_depth_limit():
         'B': ['C'],
         'C': ['D']
     }
-    graph = build_graph_bfs(packages, 'A', 1)
+    graph = build_graph_bfs(packages, 'A', TEST_DEPTH)
     assert 'A' in graph
     assert 'B' in graph
     assert 'C' not in graph
@@ -56,7 +60,7 @@ def test_get_load_order():
         'D': []
     }
     order = get_load_order(graph, 'A')
-    assert order[0] == 'A'
+    assert order[ROOT_NODE_INDEX] == 'A'
     assert 'B' in order
     assert 'D' in order
 
