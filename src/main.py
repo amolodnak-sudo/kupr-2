@@ -12,6 +12,47 @@ from graph_builder import (
 )
 
 
+def run_normal_mode(config, package_name):
+    print("\n--- Этап 2: Сбор данных ---")
+    repo_url = config['repo_url']
+    print(f"Загрузка индекса из: {repo_url}")
+    index_text = fetch_apk_index(repo_url)
+    packages = parse_packages(index_text)
+
+    print(f"\nПрямые зависимости '{package_name}':")
+    deps = get_direct_deps(packages, package_name)
+    if deps:
+        for dep in deps:
+            print(f"  - {dep}")
+    else:
+        print("  (нет зависимостей)")
+    return packages
+
+
+def run_test_mode(config, package_name):
+    print("\n--- Этап 3: Тестовый режим ---")
+    repo_path = config['repo_url']
+    print(f"Загрузка тестового графа из: {repo_path}")
+    return load_test_graph(repo_path)
+
+
+def run_visualization(graph, package_name, config):
+    print("\n--- Этап 5: Визуализация ---")
+    mermaid_code = to_mermaid(graph)
+    print("\nMermaid-код:")
+    print(mermaid_code)
+
+    mmd_path = 'graph.mmd'
+    save_mermaid(mermaid_code, mmd_path)
+    print(f"\nMermaid-код сохранён в файл: {mmd_path}")
+    print("Для конвертации в SVG используем: mmdc -i graph.mmd -o graph.svg")
+    print("или онлайн-редактор https://mermaid.live")
+
+    if config['ascii_tree'].lower() == 'true':
+        print("\nASCII-дерево зависимостей:")
+        print_ascii_tree(graph, package_name)
+
+
 def main() -> int:
     config_path = 'config.csv'
 
@@ -22,29 +63,12 @@ def main() -> int:
 
         test_mode = config['test_mode'].lower() == 'true'
         package_name = config['package_name']
-        max_depth = int(config['prop_max_depth'] if 'prop_max_depth' in config else config['max_depth'])
-        ascii_tree_enabled = config['ascii_tree'].lower() == 'true'
-        output_file = config['output_file']
+        max_depth = int(config['max_depth'])
 
         if test_mode:
-            print("\n--- Этап 3: Тестовый режим ---")
-            repo_path = config['repo_url']
-            print(f"Загрузка тестового графа из: {repo_path}")
-            packages = load_test_graph(repo_path)
+            packages = run_test_mode(config, package_name)
         else:
-            print("\n--- Этап 2: Сбор данных ---")
-            repo_url = config['repo_url']
-            print(f"Загрузка индекса из: {repo_url}")
-            index_text = fetch_apk_index(repo_url)
-            packages = parse_packages(index_text)
-
-            print(f"\nПрямые зависимости пакета '{package_name}':")
-            deps = get_direct_deps(packages, package_name)
-            if deps:
-                for dep in deps:
-                    print(f"  - {dep}")
-            else:
-                print("  (нет зависимостей)")
+            packages = run_normal_mode(config, package_name)
 
         print("\n--- Этап 3: Построение графа (BFS без рекурсии) ---")
         graph = build_graph_bfs(packages, package_name, max_depth)
@@ -63,25 +87,10 @@ def main() -> int:
         print("\n[Сравнение с реальным менеджером пакетов]")
         print("В реальном 'apk' порядок может отличаться.")
         print("Причина: 'apk' использует топологическую сортировку,")
-        print("учитывает приоритеты и виртуальные пакеты, а наш алгоритм")
-        print("использует простой обход в ширину (BFS) по уровню вложенности.")
+        print("учитывает приоритеты и виртуальные пакеты, а наш")
+        print("алгоритм использует простой обход в ширину (BFS).")
 
-        print("\n--- Этап 5: Визуализация ---")
-
-        mermaid_code = to_mermaid(graph)
-        print("\nMermaid-код:")
-        print(mermaid_code)
-
-        mmd_path = 'graph.mmd'
-        save_mermaid(mermaid_code, mmd_path)
-        print(f"\nMermaid-код сохранён в файл: {mmd_path}")
-        print(f"Для конвертации в SVG выполните в терминале:")
-        print(f"  mmdc -i {mmd_path} -o {output_file}")
-        print("  (или используйте онлайн-редактор https://mermaid.live)")
-
-        if ascii_tree_enabled:
-            print("\nASCII-дерево зависимостей:")
-            print_ascii_tree(graph, package_name)
+        run_visualization(graph, package_name, config)
 
         return 0
 
@@ -92,7 +101,7 @@ def main() -> int:
         print(f"Ошибка конфигурации: {error}", file=sys.stderr)
         return 1
     except KeyError as error:
-        print(f"Ошибка данных: Ключ или пакет не найден - {error}", file=sys.stderr)
+        print(f"Ошибка данных: {error}", file=sys.stderr)
         return 1
     except RuntimeError as error:
         print(f"Ошибка выполнения: {error}", file=sys.stderr)
