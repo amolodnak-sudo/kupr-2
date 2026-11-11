@@ -1,7 +1,7 @@
 import sys
 
 from config_parser import load_config, print_config
-from apk_parser import fetch_index, parse_packages, get_direct_deps
+from apk_parser import fetch_apk_index, parse_packages, get_direct_deps
 from graph_builder import (
     build_graph_bfs,
     get_load_order,
@@ -35,7 +35,7 @@ def main() -> int:
             print("\n--- Этап 2: Сбор данных ---")
             repo_url = config['repo_url']
             print(f"Загрузка индекса из: {repo_url}")
-            index_text = fetch_index(repo_url)
+            index_text = fetch_apk_index(repo_url)
             packages = parse_packages(index_text)
 
             print(f"\nПрямые зависимости пакета '{package_name}':")
