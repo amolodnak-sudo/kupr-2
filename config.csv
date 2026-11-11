@@ -1,7 +1,7 @@
 key,value
-package_name,curl
+package_name,git
 repo_url,https://dl-cdn.alpinelinux.org/alpine/v3.18/main/x86_64/
 test_mode,false
-output_file,graph.svg
+output_file,graph_git.svg
 ascii_tree,true
 max_depth,3
