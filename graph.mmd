@@ -1,0 +1,12 @@
+graph TD
+    so_libz_so_1["so:libz.so.1"]
+    so_libpcre2_8_so_0["so:libpcre2-8.so.0"]
+    so_libcurl_so_4["so:libcurl.so.4"]
+    so_libexpat_so_1["so:libexpat.so.1"]
+    so_libc_musl_x86_64_so_1["so:libc.musl-x86_64.so.1"]
+    git["git"]
+    git --> so_libc_musl_x86_64_so_1
+    git --> so_libcurl_so_4
+    git --> so_libexpat_so_1
+    git --> so_libpcre2_8_so_0
+    git --> so_libz_so_1
