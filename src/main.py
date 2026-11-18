@@ -143,6 +143,34 @@ def main() -> int:
 
         run_visualization(graph, package_name, config)
 
+        from visualizer import (
+            to_mermaid,
+            save_mermaid,
+            render_svg,
+            print_ascii_tree,
+        )
+
+        print("\n--- Этап 5: Визуализация ---")
+        mermaid_code = to_mermaid(graph)
+        print("\nMermaid-код:")
+        print(mermaid_code)
+
+        mmd_path = 'graph.mmd'
+        save_mermaid(mermaid_code, mmd_path)
+        print(f"\nMermaid-код сохранён: {mmd_path}")
+
+        output_file = config['output_file']
+        try:
+            render_svg(mmd_path, output_file)
+            print(f"SVG сохранён: {output_file}")
+        except RuntimeError as error:
+            print(f"Предупреждение: {error}")
+            print("Используйте: https://mermaid.live")
+
+        if config['ascii_tree'].lower() == 'true':
+            print("\nASCII-дерево зависимостей:")
+            print_ascii_tree(graph, package_name)
+
         return EXIT_SUCCESS
 
     except FileNotFoundError as error:
